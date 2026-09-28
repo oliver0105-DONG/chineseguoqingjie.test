@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>测测国庆你最适合去的城市</title>
+<style>
+  :root{
+    --bg1:#fff7ee;
+    --bg2:#ffe9d6;
+    --ink:#3d2b1f;
+    --ink2:#8a6f5c;
+    --card:#ffffff;
+    --line:#f0e2d2;
+    --red:#e8543f;
+    --red2:#f07a4b;
+    --gold:#f2b134;
+    --teal:#3fa796;
+    --blue:#5b8def;
+    --purple:#9b7ede;
+    --shadow:0 10px 30px rgba(210,120,60,.14);
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{font-size:16px}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1000px 500px at 85% -10%, rgba(242,177,52,.18), transparent 60%),
+      radial-gradient(800px 500px at -10% 30%, rgba(232,84,63,.10), transparent 60%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    min-height:100vh;
+    line-height:1.6;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 48px;position:relative}
+
+  /* ===== 通用 ===== */
+  .screen{display:none;animation:fadeUp .45s ease both}
+  .screen.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:none;cursor:pointer;font-family:inherit;font-weight:700;
+    border-radius:999px;transition:transform .15s ease, box-shadow .15s ease, opacity .15s;
+  }
+  .btn:active{transform:scale(.96)}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--red),var(--red2));
+    color:#fff;font-size:1.05rem;padding:14px 34px;
+    box-shadow:0 8px 22px rgba(232,84,63,.35);
+  }
+  .btn-primary:hover{box-shadow:0 10px 26px rgba(232,84,63,.45);transform:translateY(-2px)}
+  .btn-ghost{
+    background:rgba(255,255,255,.7);color:var(--ink2);
+    border:1.5px solid var(--line);font-size:.95rem;padding:12px 26px;
+  }
+  .btn-ghost:hover{color:var(--red);border-color:#f3c9b8}
+  .badge{
+    display:inline-block;font-size:.75rem;font-weight:700;color:#a3541e;
+    background:linear-gradient(135deg,#ffe9c7,#ffd9a8);
+    padding:4px 12px;border-radius:999px;letter-spacing:1px;
+  }
+
+  /* ===== 首页 ===== */
+  .home-card{
+    background:var(--card);border-radius:26px;box-shadow:var(--shadow);
+    overflow:hidden;border:1px solid #fff;
+  }
+  .hero{position:relative;padding:34px 24px 10px;text-align:center;overflow:hidden}
+  .hero h1{
+    font-size:1.9rem;line-height:1.35;letter-spacing:1px;margin:6px 0 4px;
+    background:linear-gradient(120deg,#d43a2a,#f07a4b 55%,#e8a23a);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero p{color:var(--ink2);font-size:.95rem}
+  .hero svg{width:100%;max-width:440px;height:auto;display:block;margin:6px auto 0}
+  .float{animation:float 3.5s ease-in-out infinite;transform-origin:center}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .cloud{animation:drift 14s linear infinite}
+  @keyframes drift{from{transform:translateX(-30px)}to{transform:translateX(60px)}}
+  .home-body{padding:8px 24px 30px;text-align:center}
+  .city-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 22px}
+  .chip{
+    font-size:.8rem;padding:6px 14px;border-radius:999px;color:#fff;font-weight:600;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+  }
+  .meta-row{display:flex;justify-content:center;gap:22px;margin-bottom:22px}
+  .meta-item{font-size:.82rem;color:var(--ink2)}
+  .meta-item b{display:block;font-size:1.25rem;color:var(--ink)}
+  .note{font-size:.75rem;color:#b09a86;margin-top:16px}
+
+  /* ===== 答题页 ===== */
+  .quiz-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .q-count{font-size:.85rem;color:var(--ink2);font-weight:600}
+  .q-count b{color:var(--red);font-size:1.05rem}
+  .quit{font-size:.8rem;color:#b09a86;background:none;border:none;cursor:pointer;font-family:inherit}
+  .progress-track{
+    height:10px;border-radius:999px;background:#f3e3d0;overflow:hidden;
+    box-shadow:inset 0 1px 3px rgba(180,120,60,.15);
+  }
+  .progress-fill{
+    height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--gold),var(--red2),var(--red));
+    transition:width .45s cubic-bezier(.22,1,.36,1);
+    position:relative;
+  }
+  .progress-fill::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 8px,transparent 8px 16px);
+  }
+  .q-card{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:26px 20px;margin-top:18px;border:1px solid #fff;
+    animation:slideIn .38s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+  .q-card.back{animation:slideBack .38s cubic-bezier(.22,1,.36,1) both}
+  @keyframes slideBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+  .q-tag{font-size:.75rem;font-weight:700;color:var(--red2);letter-spacing:2px;margin-bottom:6px}
+  .q-title{font-size:1.18rem;font-weight:800;line-height:1.5;margin-bottom:20px}
+  .opts{display:flex;flex-direction:column;gap:12px}
+  .opt{
+    display:flex;align-items:center;gap:12px;text-align:left;
+    padding:14px 16px;border-radius:14px;cursor:pointer;font-family:inherit;
+    font-size:.98rem;color:var(--ink);line-height:1.5;
+    background:#fdf8f2;border:2px solid var(--line);
+    transition:all .18s ease;width:100%;
+  }
+  .opt:hover{border-color:#f0b892;background:#fff4e8;transform:translateX(3px)}
+  .opt .radio{
+    flex:0 0 20px;width:20px;height:20px;border-radius:50%;
+    border:2px solid #dcc3a8;position:relative;transition:all .18s;
+  }
+  .opt.selected{
+    border-color:var(--red);background:linear-gradient(135deg,#fff1e8,#ffe3d1);
+    box-shadow:0 6px 16px rgba(232,84,63,.16);font-weight:700;
+  }
+  .opt.selected .radio{border-color:var(--red);background:var(--red)}
+  .opt.selected .radio::after{
+    content:"";position:absolute;inset:5px;border-radius:50%;background:#fff;
+  }
+  .quiz-nav{display:flex;gap:12px;margin-top:20px}
+  .quiz-nav .btn{flex:1;padding:14px 0;font-size:1rem}
+  .shake{animation:shake .4s ease}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)}80%{transform:translateX(5px)}
+  }
+  .toast{
+    position:fixed;left:50%;bottom:12vh;transform:translateX(-50%) translateY(20px);
+    background:rgba(61,43,31,.92);color:#fff;font-size:.88rem;
+    padding:11px 22px;border-radius:999px;opacity:0;pointer-events:none;
+    transition:all .3s ease;z-index:99;white-space:nowrap;max-width:90vw;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ===== 结果页 ===== */
+  .result-head{text-align:center;margin-bottom:16px}
+  .result-head h2{font-size:1.45rem;margin-top:10px;letter-spacing:1px}
+  .ticket{
+    background:var(--card);border-radius:24px;box-shadow:var(--shadow);
+    overflow:hidden;border:1px solid #fff;position:relative;
+    animation:ticketIn .6s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes ticketIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:none}}
+  .ticket-top{
+    padding:26px 22px 20px;color:#fff;text-align:center;position:relative;overflow:hidden;
+  }
+  .ticket-top::before{
+    content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;
+    border-radius:50%;background:rgba(255,255,255,.14);
+  }
+  .ticket-top::after{
+    content:"";position:absolute;right:20px;bottom:-40px;width:80px;height:80px;
+    border-radius:50%;background:rgba(255,255,255,.10);
+  }
+  .ticket-top .t-label{font-size:.78rem;letter-spacing:4px;opacity:.85}
+  .ticket-top .t-city{font-size:2.3rem;font-weight:900;margin:6px 0 2px;text-shadow:0 3px 10px rgba(0,0,0,.15)}
+  .ticket-top .t-tag{font-size:.9rem;opacity:.92}
+  .ticket-top .t-emoji{font-size:2.6rem;display:block;margin-bottom:2px;animation:float 3.5s ease-in-out infinite}
+  .match-pill{
+    display:inline-block;margin-top:12px;background:rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.45);border-radius:999px;
+    padding:6px 20px;font-weight:800;font-size:1rem;backdrop-filter:blur(4px);
+  }
+  .ticket-mid{padding:20px 22px 6px;position:relative}
+  .ticket-mid::before{
+    content:"";position:absolute;left:0;right:0;top:0;border-top:2px dashed var(--line);
+  }
+  .notch{position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--bg2)}
+  .notch.l{left:-11px}.notch.r{right:-11px}
+  .t-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .t-tagchip{font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:999px;background:#fdf1e4;color:#b06a3a;border:1px solid #f5ddc4}
+  .t-desc{font-size:.93rem;color:#5c4a3a;text-align:justify}
+  .sec{padding:18px 22px}
+  .sec h3{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .sec h3::before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(var(--red),var(--gold))}
+  .dims{display:flex;flex-direction:column;gap:12px}
+  .dim-row .dim-head{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:5px}
+  .dim-row .dim-head b{color:var(--ink)}
+  .dim-row .dim-head span{color:var(--ink2);font-weight:700}
+  .dim-track{height:9px;border-radius:999px;background:#f6ecdf;overflow:hidden}
+  .dim-fill{height:100%;border-radius:999px;width:0;transition:width .9s cubic-bezier(.22,1,.36,1)}
+  .dim-note{font-size:.82rem;color:var(--ink2);margin-top:4px}
+  .tips{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .tips li{
+    background:#fdf8f2;border:1px solid var(--line);border-radius:12px;
+    padding:11px 14px;font-size:.88rem;color:#5c4a3a;display:flex;gap:10px;line-height:1.55;
+  }
+  .tips li .no{
+    flex:0 0 22px;height:22px;border-radius:50%;color:#fff;font-size:.72rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .result-actions{display:flex;gap:12px;margin:26px 0 6px}
+  .result-actions .btn{flex:1;padding:14px 0;font-size:1rem}
+  .disclaimer{
+    text-align:center;font-size:.72rem;color:#bbA78f;margin-top:22px;line-height:1.7;
+  }
+  .again-card{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px 18px;margin-top:16px;font-size:.85rem;color:var(--ink2);line-height:1.7;
+  }
+  .again-card b{color:var(--ink)}
+
+  @media (max-width:420px){
+    .hero h1{font-size:1.55rem}
+    .ticket-top .t-city{font-size:1.9rem}
+    .q-card{padding:22px 16px}
+    .sec{padding:16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= 首页 ================= -->
+  <section id="screen-home" class="screen active">
+    <div class="home-card">
+      <div class="hero">
+        <span class="badge">🇨🇳 国庆出行特辑 · 趣味测评</span>
+        <h1>测测国庆<br>你最适合去的城市</h1>
+        <p>12 道轻松小题，为你匹配一座最合拍的目的地</p>
+        <!-- 原创插画：旅途小场景 -->
+        <svg viewBox="0 0 440 210" role="img" aria-label="旅途插画">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffe9c9"></stop><stop offset="1" stop-color="#fff6ea"></stop>
+            </linearGradient>
+            <linearGradient id="mt1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f2a65e"></stop><stop offset="1" stop-color="#e88b52"></stop>
+            </linearGradient>
+            <linearGradient id="mt2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#e8704f"></stop><stop offset="1" stop-color="#d95440"></stop>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="440" height="210" rx="18" fill="url(#sky)"></rect>
+          <g class="cloud" opacity=".8">
+            <ellipse cx="90" cy="46" rx="30" ry="12" fill="#fff"></ellipse>
+            <ellipse cx="112" cy="40" rx="20" ry="10" fill="#fff"></ellipse>
+          </g>
+          <g class="cloud" opacity=".65" style="animation-duration:18s">
+            <ellipse cx="330" cy="66" rx="24" ry="9" fill="#fff"></ellipse>
+            <ellipse cx="348" cy="61" rx="16" ry="8" fill="#fff"></ellipse>
+          </g>
+          <circle cx="368" cy="44" r="20" fill="#f2b134"></circle>
+          <circle cx="368" cy="44" r="27" fill="#f2b134" opacity=".25"></circle>
+          <path d="M0 168 L92 92 L150 148 L210 104 L286 170 Z" fill="url(#mt1)"></path>
+          <path d="M150 210 L246 118 L330 190 L400 140 L440 210 Z" fill="url(#mt2)"></path>
+          <path d="M246 118 L232 132 L246 128 L258 136 L272 128 L246 118" fill="#fff" opacity=".9"></path>
+          <g class="float">
+            <path d="M120 52 q10 -14 34 -8 l58 8 q16 2 14 12 t-16 8 l-40 -2 -30 18 q-8 4 -12 -2 t2 -12 l14 -10 -30 -4 q-8 -2 6 -8z" fill="#5b8def" transform="translate(60,-6) scale(.9)"></path>
+            <path d="M214 46 l10 4 -10 4 -4 -4z" fill="#2f5fc4"></path>
+          </g>
+          <g>
+            <rect x="196" y="128" width="8" height="40" rx="3" fill="#a3541e"></rect>
+            <circle cx="200" cy="120" r="9" fill="#e8543f"></circle>
+            <circle cx="200" cy="120" r="4" fill="#ffd9a8"></circle>
+            <rect x="256" y="138" width="7" height="30" rx="3" fill="#8a6f5c"></rect>
+            <circle cx="259.5" cy="131" r="8" fill="#3fa796"></circle>
+            <path d="M244 186 h96" stroke="#d9b98f" stroke-width="5" stroke-linecap="round"></path>
+            <path d="M180 186 h40" stroke="#d9b98f" stroke-width="5" stroke-linecap="round"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="home-body">
+        <div class="city-chips">
+          <span class="chip" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">成都</span>
+          <span class="chip" style="background:linear-gradient(135deg,#c05a3a,#e8964f)">西安</span>
+          <span class="chip" style="background:linear-gradient(135deg,#2f9e8f,#5cc9b8)">三亚</span>
+          <span class="chip" style="background:linear-gradient(135deg,#5b8def,#8fb1f5)">大理</span>
+          <span class="chip" style="background:linear-gradient(135deg,#9b7ede,#bda6ef)">上海</span>
+          <span class="chip" style="background:linear-gradient(135deg,#d4494f,#ef7a72)">北京</span>
+        </div>
+        <div class="meta-row">
+          <div class="meta-item"><b>12</b>道趣味题</div>
+          <div class="meta-item"><b>6</b>座候选城市</div>
+          <div class="meta-item"><b>~3</b>分钟完成</div>
+        </div>
+        <button class="btn btn-primary" id="btn-start">🧳 开始测评</button>
+        <p class="note">本测评为原创趣味自评，仅供出行灵感参考，非专业旅游规划或心理测试。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 答题页 ================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-top">
+      <div class="q-count">第 <b id="q-now">12</b> / <span id="q-total">12</span> 题</div>
+      <button class="quit" id="btn-quit">✕ 退出</button>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress" style="width: 100%;"></div></div>
+    <div class="q-card" id="q-card" style="">
+      <div class="q-tag" id="q-tag">QUESTION 12 · 纪念品</div>
+      <div class="q-title" id="q-title">回程行李箱里，你最想装进什么？</div>
+      <div class="opts" id="q-opts"><button type="button" class="opt selected"><span class="radio"></span><span>真空包装的特产小吃，吃货认证</span></button><button type="button" class="opt"><span class="radio"></span><span>手工文创和小众饰品</span></button><button type="button" class="opt"><span class="radio"></span><span>购物战利品，大牌+新潮好物</span></button><button type="button" class="opt"><span class="radio"></span><span>贝壳、冰箱贴之类的小玩意</span></button></div>
+      <div class="quiz-nav">
+        <button class="btn btn-ghost" id="btn-prev" style="visibility: visible;">← 上一题</button>
+        <button class="btn btn-primary" id="btn-next">✅ 提交并查看结果</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 结果页 ================= -->
+  <section id="screen-result" class="screen">
+    <div class="result-head">
+      <span class="badge">🎉 你的国庆目的地揭晓</span>
+      <h2 id="r-title">你最适合去 <span style="color:#e8543f">成都</span></h2>
+    </div>
+
+    <!-- 车票式结果卡 -->
+    <div class="ticket">
+      <div class="ticket-top" id="t-top" style="background: linear-gradient(135deg, rgb(232, 84, 63), rgb(240, 122, 75));">
+        <span class="t-label">GOLDEN WEEK · TRAVEL TICKET</span>
+        <span class="t-emoji" id="t-emoji">🐼</span>
+        <div class="t-city" id="t-city">成都</div>
+        <div class="t-tag" id="t-tagline">美食与慢生活的快乐老家</div>
+        <div class="match-pill" id="t-match">契合度 60%</div>
+      </div>
+      <div class="ticket-mid">
+        <span class="notch l"></span><span class="notch r"></span>
+        <div class="t-tags" id="t-tags"><span class="t-tagchip"># 美食之都</span><span class="t-tagchip"># 松弛感拉满</span><span class="t-tagchip"># 茶馆麻将</span><span class="t-tagchip"># 人均友好</span></div>
+        <p class="t-desc" id="t-desc">成都几乎是为国庆量身定做的城市：宽窄巷子的人民公园喝茶、奎星楼的串串冒菜、玉林路的深夜小酒馆，节奏慢到刚好治愈你。11 月前后天气微凉不晒，火锅正香。你不需要排满行程——睡醒吃、吃了逛、逛累喝茶，就是最正确的打开方式。</p>
+      </div>
+      <div class="sec">
+        <h3>你的旅行画像</h3>
+        <div class="dims" id="r-dims"><div class="dim-row"><div class="dim-head"><b>都市活力</b><span>36%</span></div><div class="dim-track"><div class="dim-fill" style="background: linear-gradient(90deg, rgb(155, 126, 222), rgb(189, 166, 239)); width: 36%;" data-w="36"></div></div></div><div class="dim-row"><div class="dim-head"><b>美食烟火</b><span>23%</span></div><div class="dim-track"><div class="dim-fill" style="background: linear-gradient(90deg, rgb(232, 84, 63), rgb(242, 177, 52)); width: 23%;" data-w="23"></div></div></div><div class="dim-row"><div class="dim-head"><b>慢节奏治愈</b><span>18%</span></div><div class="dim-track"><div class="dim-fill" style="background: linear-gradient(90deg, rgb(91, 141, 239), rgb(143, 177, 245)); width: 18%;" data-w="18"></div></div></div><div class="dim-row"><div class="dim-head"><b>自然风光</b><span>14%</span></div><div class="dim-track"><div class="dim-fill" style="background: linear-gradient(90deg, rgb(63, 167, 150), rgb(92, 201, 184)); width: 14%;" data-w="14"></div></div></div><div class="dim-row"><div class="dim-head"><b>历史人文</b><span>9%</span></div><div class="dim-track"><div class="dim-fill" style="background: linear-gradient(90deg, rgb(192, 90, 58), rgb(232, 150, 79)); width: 9%;" data-w="9"></div></div></div></div>
+        <p class="dim-note" id="r-dim-note">你的旅行基因以 <b>都市活力</b> 和 <b>美食烟火</b> 为主——这正是 成都 最擅长提供的东西，所以它和你的气质一拍即合。</p>
+      </div>
+      <div class="sec" style="padding-top:4px">
+        <h3>行动建议</h3>
+        <ul class="tips" id="r-tips"><li><span class="no" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">1</span><span>提前 7-10 天订好酒店和热门火锅的等位，国庆成都人气极高</span></li><li><span class="no" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">2</span><span>安排半天去人民公园鹤鸣茶社喝茶采耳，体验本地人的松弛</span></li><li><span class="no" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">3</span><span>用一天留给出发 1.5 小时的都江堰或熊猫基地，避开上午高峰</span></li><li><span class="no" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">4</span><span>奎星楼街、玉林路、建设路小吃街按早中晚错峰打卡</span></li><li><span class="no" style="background:linear-gradient(135deg,#e8543f,#f07a4b)">5</span><span>预算人均 1500-2500 元（3 天）即可吃好玩好，性价比很高</span></li></ul>
+      </div>
+    </div>
+
+    <!-- 次选 & 全部城市得分 -->
+    <div class="again-card" id="r-second"><b>🥈 备选目的地：大理 🏔️</b><br>如果 成都 的机票太贵或订不到房，大理（风花雪月的治愈系慢游）也非常契合你的口味，可以放心作为 Plan B。</div>
+    <div class="again-card" id="r-all"><b>📊 各城市匹配得分（实时计算，非随机）</b><br>成都 🐼：<b>6 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:100%;background:linear-gradient(135deg,#e8543f,#f07a4b)"></span></span><br>大理 🏔️：<b>6 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:100%;background:linear-gradient(135deg,#5b8def,#8fb1f5)"></span></span><br>北京 🏮：<b>5 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:83%;background:linear-gradient(135deg,#d4494f,#ef7a72)"></span></span><br>西安 🏯：<b>4 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:67%;background:linear-gradient(135deg,#c05a3a,#e8964f)"></span></span><br>三亚 🌴：<b>4 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:67%;background:linear-gradient(135deg,#2f9e8f,#5cc9b8)"></span></span><br>上海 🌆：<b>4 分</b> <span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px"><span style="display:block;height:100%;width:67%;background:linear-gradient(135deg,#9b7ede,#bda6ef)"></span></span></div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btn-retry">🔄 重新测试</button>
+      <button class="btn btn-ghost" id="btn-share">📋 复制结果</button>
+    </div>
+    <p class="disclaimer">本测评基于你的作答实时计算得分（每题选项对应不同城市与维度的分值），结果可复现、可验证。<br>内容为原创趣味自评，不构成任何专业诊断、心理评估或投资式出行建议。</p>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =========================================================
+   数据定义
+   城市代号：cd=成都 xa=西安 sy=三亚 dl=大理 sh=上海 bj=北京
+   维度：nature=自然风光 culture=历史人文 food=美食烟火
+         city=都市活力 slow=慢节奏治愈
+========================================================= */
+var CITIES = {
+  cd:{name:"成都",emoji:"🐼",tagline:"美食与慢生活的快乐老家",
+      grad:"linear-gradient(135deg,#e8543f,#f07a4b)",
+      tags:["美食之都","松弛感拉满","茶馆麻将","人均友好"],
+      desc:"成都几乎是为国庆量身定做的城市：宽窄巷子的人民公园喝茶、奎星楼的串串冒菜、玉林路的深夜小酒馆，节奏慢到刚好治愈你。11 月前后天气微凉不晒，火锅正香。你不需要排满行程——睡醒吃、吃了逛、逛累喝茶，就是最正确的打开方式。",
+      tips:[
+        "提前 7-10 天订好酒店和热门火锅的等位，国庆成都人气极高",
+        "安排半天去人民公园鹤鸣茶社喝茶采耳，体验本地人的松弛",
+        "用一天留给出发 1.5 小时的都江堰或熊猫基地，避开上午高峰",
+        "奎星楼街、玉林路、建设路小吃街按早中晚错峰打卡",
+        "预算人均 1500-2500 元（3 天）即可吃好玩好，性价比很高"
+      ]},
+  xa:{name:"西安",emoji:"🏯",tagline:"一秒穿越千年的古都",
+      grad:"linear-gradient(135deg,#c05a3a,#e8964f)",
+      tags:["千年古都","汉服打卡","碳水天堂","夜市烟火"],
+      desc:"秋高气爽的十月正是西安最好的季节。清晨在明城墙上骑车，中午一碗油泼面，傍晚换上汉服走进大唐不夜城——灯光亮起的那一刻，历史和烟火气同时扑面而来。国庆期间古城氛围感直接拉满，适合既想暴走打卡又馋碳水的人。",
+      tips:[
+        "陕西历史博物馆、兵马俑务必提前在官方渠道实名预约",
+        "城墙骑行选傍晚 5 点后，看日落顺便躲开白天暴晒",
+        "汉服妆造提前预约，回民街讲价吃小吃，永兴坊摔碗酒顺路",
+        "国庆大雁塔、不夜城人流巨大，把夜景安排在工作日晚些时段",
+        "肉夹馍+凉皮+冰峰\"三秦套餐\"必吃， biangbiang 面认准现扯"
+      ]},
+  sy:{name:"三亚",emoji:"🌴",tagline:"阳光沙滩的度假充电站",
+      grad:"linear-gradient(135deg,#2f9e8f,#5cc9b8)",
+      tags:["海岛度假","碧海蓝天","亲子友好","酒店躺平"],
+      desc:"十月的台风季基本过去，三亚迎来一年中最舒服的时段：阳光回归、游客还没到峰值、海水清澈。它的玩法只有一个字——躺。早上被海浪叫醒，下午泳池椰子水，傍晚亚龙湾看日落。适合想把假期彻底还给自己、什么计划都不想做的人。",
+      tips:[
+        "住海棠湾/亚龙湾一线酒店性价比最高，国庆前订常有一价全包",
+        "防晒霜、遮阳帽、泳衣提前备齐，当地买贵不少",
+        "蜈支洲岛、后海村选晴天上岛，出行前查好海况",
+        "海鲜去第一市场自选加工，认准明码标价的加工店",
+        "租车自驾比打车划算，环岛路本身就是风景"
+      ]},
+  dl:{name:"大理",emoji:"🏔️",tagline:"风花雪月的治愈系慢游",
+      grad:"linear-gradient(135deg,#5b8def,#8fb1f5)",
+      tags:["苍山洱海","治愈慢游","文艺旅拍","气候宜人"],
+      desc:"十月的大理是一年里最舒服的样子：天空蓝得不像话，洱海边的风刚刚好。租一辆小电驴沿环海路慢慢骑，在喜洲古镇看稻田，在双廊发一下午呆。这里没有必打卡清单，它存在的意义就是让你把日程表撕掉，做几天\"大理人\"。",
+      tips:[
+        "昼夜温差大，带一件外套，白天紫外线强注意防晒",
+        "洱海骑行选海西线（生态廊道），租电瓶车记得问清续航",
+        "喜洲古镇+海舍公园稻田十月正金黄，拍照黄金期",
+        "住宿选才村、龙龛码头附近海景房，国庆需提前 2 周订",
+        "留一整天什么都不安排，咖啡馆发呆是大理的正确玩法"
+      ]},
+  sh:{name:"上海",emoji:"🌆",tagline:"都市摩登人的快乐星球",
+      grad:"linear-gradient(135deg,#9b7ede,#bda6ef)",
+      tags:["时尚都市","展览演出","夜生活","逛街购物"],
+      desc:"国庆的上海是氛围感大师：武康路的梧桐树下挂满国旗、外滩江风配对岸灯光、安福路的街拍达人和全城不停歇的展览演出。白天逛美术馆买手冲咖啡，晚上钻进爵士酒吧或 livehouse，一座把\"精致\"刻进日常的城市，正适合活力满满的你。",
+      tips:[
+        "国庆外滩、武康路人流极大，清晨 7-9 点出片率最高",
+        "提前预约想看的展览（西岸美术馆、UCCA Edge 等）",
+        "避开人挤人：去浦东滨江、苏州河步道，夜景同样在线",
+        "地铁+步行最方便，市区停车费贵且难找位",
+        "留半天去朱家角或梧桐区 City Walk，感受城市另一面"
+      ]},
+  bj:{name:"北京",emoji:"🏮",tagline:"红墙金秋的仪式感之城",
+      grad:"linear-gradient(135deg,#d4494f,#ef7a72)",
+      tags:["国庆氛围","皇家园林","胡同漫步","文化大餐"],
+      desc:"没有哪座城市比北京更有国庆氛围：满城红旗、天安门花坛、香山初染的红叶。上午在故宫红墙下拍照，中午胡同里来一顿涮肉，下午景山俯瞰整座中轴线。它厚重但不沉闷，热闹但讲规矩，适合想要仪式感和文化含量双高的旅行者。",
+      tips:[
+        "故宫、国家博物馆、天安门广场全部需要提前预约，务必抢票",
+        "国庆当天核心区域管控严格，行程尽量避开 10 月 1 日上午",
+        "香山、地坛、景山都是赏秋+氛围感双赢的选择",
+        "胡同游推荐雍和宫-五道营-国子监一线，吃喝逛一体",
+        "早晚温差大，备一件外套；烤鸭、涮肉认准老字号分店排队少"
+      ]}
+};
+
+var DIMS = {
+  nature:{name:"自然风光",color:"linear-gradient(90deg,#3fa796,#5cc9b8)"},
+  culture:{name:"历史人文",color:"linear-gradient(90deg,#c05a3a,#e8964f)"},
+  food:{name:"美食烟火",color:"linear-gradient(90deg,#e8543f,#f2b134)"},
+  city:{name:"都市活力",color:"linear-gradient(90deg,#9b7ede,#bda6ef)"},
+  slow:{name:"慢节奏治愈",color:"linear-gradient(90deg,#5b8def,#8fb1f5)"}
+};
+
+/* 每题选项：s=城市得分 d=维度得分 */
+var QUESTIONS = [
+  {tag:"假期状态",title:"这个国庆，你最理想的度过方式是？",opts:[
+    {t:"找个安静的地方彻底躺平放空",s:{dl:2,sy:1},d:{slow:2}},
+    {t:"暴走打卡，把假期过得满满当当",s:{bj:2,xa:1},d:{city:2}},
+    {t:"以吃为主线，随缘逛逛",s:{cd:2,xa:1},d:{food:2,slow:1}},
+    {t:"城市漫游，逛街看展两不误",s:{sh:2},d:{city:2}}
+  ]},
+  {tag:"出行同伴",title:"这次旅行你最想和谁一起？",opts:[
+    {t:"一个人，自由自在说走就走",s:{dl:2,sh:1},d:{slow:2,city:1}},
+    {t:"和另一半来一场浪漫双人游",s:{sh:2,sy:1},d:{city:1}},
+    {t:"闺蜜兄弟组队，怎么热闹怎么来",s:{cd:1,sh:1},d:{city:2,food:1}},
+    {t:"带爸妈或孩子，全家总动员",s:{bj:2,xa:1},d:{culture:2}}
+  ]},
+  {tag:"预算心态",title:"对这次出行的预算，你的想法是？",opts:[
+    {t:"性价比优先，钱要花在刀刃上",s:{cd:2,xa:1},d:{food:1}},
+    {t:"该花花该省省，丰俭由人",s:{dl:1,cd:1},d:{slow:1}},
+    {t:"预算充足，体验感优先",s:{sh:2,sy:1},d:{city:1}},
+    {t:"为一顿好吃的不惜一切",s:{cd:1,bj:1},d:{food:2}}
+  ]},
+  {tag:"理想天气",title:"你心中完美的旅行天气是？",opts:[
+    {t:"秋高气爽，20℃ 左右最舒服",s:{bj:2,xa:1},d:{culture:1}},
+    {t:"阳光沙滩，晒太阳才叫假期",s:{sy:2},d:{nature:2}},
+    {t:"凉爽的高原风，天空蓝到发光",s:{dl:2},d:{nature:2,slow:1}},
+    {t:"天气无所谓，室内活动照样精彩",s:{sh:1,cd:1},d:{city:1}}
+  ]},
+  {tag:"心动风景",title:"下面哪种风景最让你心动？",opts:[
+    {t:"一望无际的海岸线和日落",s:{sy:2},d:{nature:2}},
+    {t:"古城墙、红墙与飞檐",s:{xa:2,bj:1},d:{culture:2}},
+    {t:"雪山倒映在湖里的干净画面",s:{dl:2},d:{nature:2}},
+    {t:"霓虹闪烁的天际线夜景",s:{sh:2},d:{city:2}}
+  ]},
+  {tag:"早餐哲学",title:"旅行第一天的早餐，你想吃？",opts:[
+    {t:"一碗红油翻滚的重庆小面或肥肠粉",s:{cd:2},d:{food:2}},
+    {t:"肉夹馍配胡辣汤，管饱顶饿",s:{xa:2},d:{food:1,culture:1}},
+    {t:"生煎小笼配咖啡，精致开局",s:{sh:2},d:{food:1,city:1}},
+    {t:"酒店自助慢慢吃，不着急",s:{sy:1,dl:1},d:{slow:2}}
+  ]},
+  {tag:"出片风格",title:"你的旅行照片会是什么风格？",opts:[
+    {t:"民族风旅拍，蓝天白云做背景",s:{dl:2},d:{nature:1}},
+    {t:"汉服古装大片，一秒入戏",s:{xa:2,bj:2},d:{culture:2}},
+    {t:"时尚街拍，怎么酷怎么来",s:{sh:2},d:{city:2}},
+    {t:"海边剪影，氛围感拉满",s:{sy:2},d:{nature:1}}
+  ]},
+  {tag:"美食选择",title:"排队两小时的网红店和巷子里的苍蝇馆子，你选？",opts:[
+    {t:"网红店！排队也要打卡发圈",s:{sh:1,sy:1},d:{city:2}},
+    {t:"苍蝇馆子！本地人才懂的宝藏",s:{cd:2},d:{food:2}},
+    {t:"景区边走边吃小吃，方便就好",s:{xa:2,bj:1},d:{food:1,culture:1}},
+    {t:"找个农家乐，吃口现摘的生态菜",s:{dl:2},d:{slow:2,nature:1}}
+  ]},
+  {tag:"夜晚安排",title:"晚上 9 点，你会在做什么？",opts:[
+    {t:"酒吧或 livehouse，夜生活刚开始",s:{sh:2},d:{city:2}},
+    {t:"夜市撸串，越夜越有味",s:{cd:1,xa:1},d:{food:2}},
+    {t:"海边散步看星星，安静收尾",s:{sy:1,dl:2},d:{slow:2}},
+    {t:"看灯光秀和城市夜景",s:{bj:2},d:{culture:1,city:1}}
+  ]},
+  {tag:"人流心态",title:"国庆人多，你的真实态度是？",opts:[
+    {t:"人多才有过节的气氛，热闹万岁",s:{bj:2},d:{city:2}},
+    {t:"尽量往人少的地方钻，清净最重要",s:{dl:2,sy:1},d:{slow:2}}, // 保持
+    {t:"淡定排队，就当体验烟火气",s:{sh:1,cd:1},d:{food:1}},
+    {t:"做好规划错峰出行，人少人多都能玩",s:{xa:1,sy:1},d:{nature:1,culture:1}}
+  ]},
+  {tag:"行程节奏",title:"你更喜欢的旅行节奏是？",opts:[
+    {t:"行程排满，效率第一不浪费时间",s:{xa:2,bj:1},d:{culture:1,city:1}},
+    {t:"睡到自然醒，下午再出发",s:{dl:2,cd:1},d:{slow:2}},
+    {t:"每天一个主题，张弛有度刚刚好",s:{sh:1,sy:1},d:{city:1}},
+    {t:"随性走到哪算哪，不设计划",s:{cd:2},d:{slow:1,food:1}}
+  ]},
+  {tag:"纪念品",title:"回程行李箱里，你最想装进什么？",opts:[
+    {t:"真空包装的特产小吃，吃货认证",s:{cd:2},d:{food:2}},
+    {t:"手工文创和小众饰品",s:{dl:1,xa:1,bj:2},d:{culture:1}},
+    {t:"购物战利品，大牌+新潮好物",s:{sh:2},d:{city:2}},
+    {t:"贝壳、冰箱贴之类的小玩意",s:{sy:2},d:{nature:1}}
+  ]}
+];
+
+/* =========================================================
+   状态与工具
+========================================================= */
+var answers = new Array(QUESTIONS.length).fill(null); // 存选项索引
+var cur = 0;
+var lastResult = null;
+var advanceTimer = null; // 自动跳题定时器
+
+var $ = function(id){ return document.getElementById(id); };
+var screens = { home:$("screen-home"), quiz:$("screen-quiz"), result:$("screen-result") };
+
+function show(name){
+  Object.keys(screens).forEach(function(k){ screens[k].classList.remove("active"); });
+  screens[name].classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+var toastTimer = null;
+function toast(msg){
+  var t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1800);
+}
+
+/* =========================================================
+   计分核心：由答案真实计算城市分 + 维度分
+========================================================= */
+function computeResult(){
+  var cityScore = {}, dimScore = {};
+  Object.keys(CITIES).forEach(function(k){ cityScore[k] = 0; });
+  Object.keys(DIMS).forEach(function(k){ dimScore[k] = 0; });
+
+  answers.forEach(function(optIdx, qIdx){
+    if(optIdx === null) return;
+    var opt = QUESTIONS[qIdx].opts[optIdx];
+    var k;
+    if(opt.s) for(k in opt.s) cityScore[k] += opt.s[k];
+    if(opt.d) for(k in opt.d) dimScore[k] += opt.d[k];
+  });
+
+  // 找最高分城市（同分时按定义顺序取先者，保证结果可复现）
+  var best = null, second = null;
+  Object.keys(cityScore).forEach(function(k){
+    if(best === null || cityScore[k] > cityScore[best]){ second = best; best = k; }
+    else if(second === null || cityScore[k] > cityScore[second]){ second = k; }
+  });
+
+  var total = 0;
+  Object.keys(cityScore).forEach(function(k){ total += cityScore[k]; });
+
+  // 契合度：领先优势越大越高，范围约 60~95
+  var top = cityScore[best], sec = cityScore[second] || 0;
+  var match = Math.round(60 + (sec === 0 ? 1 : (top - sec) / top) * 35);
+
+  // 维度占比
+  var dimTotal = 0;
+  Object.keys(dimScore).forEach(function(k){ dimTotal += dimScore[k]; });
+  var dimPct = {};
+  Object.keys(dimScore).forEach(function(k){
+    dimPct[k] = dimTotal ? Math.round(dimScore[k] / dimTotal * 100) : 0;
+  });
+
+  return { cityScore:cityScore, dimScore:dimScore, dimPct:dimPct,
+           best:best, second:second, match:match, total:total };
+}
+
+/* =========================================================
+   答题页渲染
+========================================================= */
+function pad(n){ return n < 10 ? "0" + n : "" + n; }
+
+function renderQuestion(goBack){
+  var q = QUESTIONS[cur];
+  var card = $("q-card");
+  // 重触发进场动画
+  card.classList.remove("back");
+  card.style.animation = "none";
+  void card.offsetWidth;
+  card.style.animation = "";
+  card.classList.toggle("back", !!goBack);
+
+  $("q-now").textContent = cur + 1;
+  $("q-tag").textContent = "QUESTION " + pad(cur + 1) + " · " + q.tag;
+  $("q-title").textContent = q.title;
+
+  var box = $("q-opts");
+  box.innerHTML = "";
+  q.opts.forEach(function(opt, i){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "opt" + (answers[cur] === i ? " selected" : "");
+    btn.innerHTML = '<span class="radio"></span><span>' + opt.t + "</span>";
+    btn.onclick = function(){
+      clearTimeout(advanceTimer); // 防止快速连点导致连跳两题
+      answers[cur] = i;
+      // 保留选中态并自动进入下一题（最后一题除外）
+      renderQuestion(false);
+      if(cur < QUESTIONS.length - 1){
+        advanceTimer = setTimeout(function(){ cur++; renderQuestion(false); updateProgress(); }, 160);
+      }
+    };
+    box.appendChild(btn);
+  });
+
+  $("btn-prev").style.visibility = cur === 0 ? "hidden" : "visible";
+  $("btn-next").textContent = (cur === QUESTIONS.length - 1) ? "✅ 提交并查看结果" : "下一题 →";
+  updateProgress();
+}
+
+function updateProgress(){
+  // 进度条 = 已作答题数 / 总题数（修改答案不影响进度，只影响得分）
+  var done = answers.filter(function(a){ return a !== null; }).length;
+  $("progress").style.width = Math.round(done / QUESTIONS.length * 100) + "%";
+}
+
+/* =========================================================
+   结果页渲染
+========================================================= */
+function renderResult(r){
+  lastResult = r;
+  var c = CITIES[r.best];
+  $("r-title").innerHTML = "你最适合去 <span style='color:" + "#e8543f" + "'>" + c.name + "</span>";
+  $("t-emoji").textContent = c.emoji;
+  $("t-city").textContent = c.name;
+  $("t-tagline").textContent = c.tagline;
+  $("t-match").textContent = "契合度 " + r.match + "%";
+  $("t-top").style.background = c.grad;
+  $("t-tags").innerHTML = c.tags.map(function(t){
+    return '<span class="t-tagchip"># ' + t + "</span>";
+  }).join("");
+  $("t-desc").textContent = c.desc;
+
+  // 维度条
+  var dimsBox = $("r-dims");
+  dimsBox.innerHTML = "";
+  var sortedDims = Object.keys(r.dimPct).sort(function(a,b){ return r.dimPct[b] - r.dimPct[a]; });
+  sortedDims.forEach(function(k){
+    var row = document.createElement("div");
+    row.className = "dim-row";
+    row.innerHTML =
+      '<div class="dim-head"><b>' + DIMS[k].name + "</b><span>" + r.dimPct[k] + "%</span></div>" +
+      '<div class="dim-track"><div class="dim-fill" style="background:' + DIMS[k].color + '" data-w="' + r.dimPct[k] + '"></div></div>';
+    dimsBox.appendChild(row);
+  });
+  // 动画填充
+  setTimeout(function(){
+    dimsBox.querySelectorAll(".dim-fill").forEach(function(el){
+      el.style.width = el.getAttribute("data-w") + "%";
+    });
+  }, 350);
+
+  var top2 = sortedDims.slice(0,2);
+  $("r-dim-note").innerHTML = "你的旅行基因以 <b>" + DIMS[top2[0]].name + "</b> 和 <b>" +
+    DIMS[top2[1]].name + "</b> 为主——这正是 " + c.name + " 最擅长提供的东西，所以它和你的气质一拍即合。";
+
+  // 行动建议
+  var tipsBox = $("r-tips");
+  tipsBox.innerHTML = "";
+  c.tips.forEach(function(t, i){
+    var li = document.createElement("li");
+    li.innerHTML = '<span class="no" style="background:' + c.grad + '">' + (i+1) + "</span><span>" + t + "</span>";
+    tipsBox.appendChild(li);
+  });
+
+  // 次选 + 全部得分
+  var secCity = CITIES[r.second];
+  $("r-second").innerHTML =
+    "<b>🥈 备选目的地：" + secCity.name + " " + secCity.emoji + "</b><br>" +
+    "如果 " + c.name + " 的机票太贵或订不到房，" + secCity.name + "（" + secCity.tagline + "）也非常契合你的口味，可以放心作为 Plan B。";
+
+  var rank = Object.keys(r.cityScore).sort(function(a,b){ return r.cityScore[b] - r.cityScore[a]; });
+  var maxScore = r.cityScore[rank[0]] || 1;
+  $("r-all").innerHTML = "<b>📊 各城市匹配得分（实时计算，非随机）</b><br>" +
+    rank.map(function(k){
+      var pct = Math.round(r.cityScore[k] / maxScore * 100);
+      return CITIES[k].name + " " + CITIES[k].emoji +
+        "：<b>" + r.cityScore[k] + " 分</b> " + bar(pct, CITIES[k].grad);
+    }).join("<br>");
+
+  function bar(p, color){
+    return '<span style="display:inline-block;vertical-align:middle;width:110px;height:8px;background:#f3e7d7;border-radius:99px;overflow:hidden;margin-left:6px">' +
+      '<span style="display:block;height:100%;width:' + p + '%;background:' + color + '"></span></span>';
+  }
+}
+
+/* =========================================================
+   事件绑定
+========================================================= */
+$("btn-start").onclick = function(){
+  cur = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  show("quiz");
+  renderQuestion(false);
+};
+
+$("btn-quit").onclick = function(){
+  show("home");
+};
+
+$("btn-prev").onclick = function(){
+  if(cur > 0){ cur--; renderQuestion(true); }
+};
+
+$("btn-next").onclick = function(){
+  if(answers[cur] === null){
+    toast(cur === QUESTIONS.length - 1 ? "请先选择一个答案再提交哦" : "这题还没选哦，选一个再继续～");
+    var card = $("q-card");
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+    return;
+  }
+  if(cur < QUESTIONS.length - 1){
+    cur++;
+    renderQuestion(false);
+  }else{
+    // 最终提交：全部已答校验
+    var unanswered = answers.findIndex(function(a){ return a === null; });
+    if(unanswered !== -1){
+      cur = unanswered;
+      renderQuestion(false);
+      toast("还有第 " + (unanswered + 1) + " 题没答，帮你跳过去了");
+      return;
+    }
+    renderResult(computeResult());
+    show("result");
+  }
+};
+
+$("btn-retry").onclick = function(){
+  cur = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  show("home");
+};
+
+$("btn-share").onclick = function(){
+  if(!lastResult) return;
+  var c = CITIES[lastResult.best];
+  var text = "【国庆目的地测评】我是 " + c.name + c.emoji + "（契合度 " + lastResult.match + "%，" + c.tagline + "），你也来测测吧！";
+  var done = function(ok){ toast(ok ? "结果已复制，去粘贴分享吧～" : "复制失败，请手动截图分享"); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+  }else{
+    var ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    done(ok);
+  }
+};
+</script>
+
+
+</body></html>
